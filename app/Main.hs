@@ -4,9 +4,21 @@ import System.Environment
 import System.Exit
 import System.IO (hSetBuffering, stdout, stderr, BufferMode (NoBuffering))
 
+matchDigit :: Char -> String -> Bool
+matchDigit _ [] = False
+matchDigit char input
+  | char=='d' = any (`elem` input) ['0'..'9']
+  | otherwise =  elem char input
+
+match_single_wildcards :: Char -> String ->Bool
+match_single_wildcards wildcard input
+  | wildcard=='d' =  matchDigit wildcard input
+  | otherwise = False
+
 matchPattern :: String -> String -> Bool
 matchPattern pattern input
   | lp==1 = elem (head pattern) input
+  | lp==2 && head pattern == '\\' = match_single_wildcards (last pattern) input
   | otherwise = error $ "Unhandled pattern: " ++ pattern
   where
     lp = length pattern
