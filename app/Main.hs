@@ -14,9 +14,11 @@ matchPattern :: String -> String -> Bool
 matchPattern pattern input
   | lp==1 = elem (head pattern) input
   | lp==2 && head pattern == '\\' = match_single_wildcards (last pattern) input
+  | head pattern == '[' && last pattern == ']' = any (`elem` input) content_between_brackets
   | otherwise = error $ "Unhandled pattern: " ++ pattern
   where
     lp = length pattern
+    content_between_brackets = (init (tail pattern))
 
 main :: IO ()
 main = do
