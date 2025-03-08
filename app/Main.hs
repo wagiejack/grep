@@ -4,16 +4,11 @@ import System.Environment
 import System.Exit
 import System.IO (hSetBuffering, stdout, stderr, BufferMode (NoBuffering))
 
-matchDigit :: Char -> String -> Bool
-matchDigit _ [] = False
-matchDigit char input
-  | char=='d' = any (`elem` input) ['0'..'9']
-  | otherwise =  elem char input
-
 match_single_wildcards :: Char -> String ->Bool
 match_single_wildcards wildcard input
-  | wildcard=='d' =  matchDigit wildcard input
-  | otherwise = False
+  | wildcard=='d' = any (`elem` input) ['0'..'9']
+  | wildcard=='w' = any (`elem` input) (['0'..'9']++['a'..'z']++['A'..'Z']++['_'])
+  | otherwise = error $ "Unhandled single wildcard pattern: " ++ [wildcard]
 
 matchPattern :: String -> String -> Bool
 matchPattern pattern input
