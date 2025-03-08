@@ -6,7 +6,7 @@ import System.IO (hSetBuffering, stdout, stderr, BufferMode (NoBuffering))
 
 matchPattern :: String -> String -> Bool
 matchPattern pattern input
-  | lp==1 = elem head pattern input
+  | lp==1 = elem (head pattern) input
   | otherwise = error $ "Unhandled pattern: " ++ pattern
   where
     lp = length pattern
