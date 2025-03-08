@@ -5,10 +5,11 @@ import System.Exit
 import System.IO (hSetBuffering, stdout, stderr, BufferMode (NoBuffering))
 
 matchPattern :: String -> String -> Bool
-matchPattern pattern input = do
-  if length pattern == 1
-    then head pattern `elem` input
-    else error $ "Unhandled pattern: " ++ pattern
+matchPattern pattern input
+  | lp==1 = elem pattern input
+  | otherwise = error $ "Unhandled pattern: " ++ pattern
+  where
+    lp = length pattern
 
 main :: IO ()
 main = do
