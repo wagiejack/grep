@@ -34,7 +34,7 @@ matchPattern_string_anchor patterns (input:rest_inputs) = (matchPattern (head pa
  -- next pattern next input (pass to parent)
  -- same pattern next input (pass to parent)
 -- in case of no match  
- -- next pattern same input (pass to parent)
+ --same pattern same input (pass to parent)
 matchPattern_one_or_more :: [String]->String->Bool
 matchPattern_one_or_more [] []= True
 matchPattern_one_or_more [] _ = False
@@ -44,7 +44,7 @@ matchPattern_one_or_more pattern@(first_pattern:"+":rest_pattern) input@(first_i
   | matchPattern first_pattern first_input = matchPattern_one_or_more pattern rest_input || 
                                            matchPattern_parent rest_pattern rest_input ||
                                            matchPattern_parent pattern rest_input
-  | otherwise = matchPattern_parent rest_pattern input
+  | otherwise = matchPattern_parent pattern rest_input
 
 -- we need one more level of abstraction between the first pattern matcher and the processor where
   -- if we have a \ then we also send the next character 
