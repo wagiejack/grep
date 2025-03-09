@@ -57,7 +57,7 @@ matchPattern_one_or_more pattern@(first_pattern:"+":rest_pattern) input@(first_i
  -- if ^something then we can send length of pattern -1 and increment accordingly the input processing for other cases
 matchPattern_parent :: [String]->String->Bool
 matchPattern_parent [] [] = True
-matchPattern_parent [] _ = False
+matchPattern_parent [] _ = True
 matchPattern_parent _ [] = False
 -- start of string anchor matching
 matchPattern_parent (['^']:rest_of_pattern) input = matchPattern_string_anchor rest_of_pattern input
