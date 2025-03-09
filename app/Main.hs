@@ -43,28 +43,29 @@ matchPattern_parent _ [] = False
 -- start of string anchor matching
 matchPattern_parent (['^']:rest_of_pattern) input = matchPattern_string_anchor rest_of_pattern input
 -- other matching
-matchPattern_parent pattern input = 
+matchPattern_parent pattern input
   -- let 
   --   (input_to_be_sent, length_of_input_to_be_taken, match_input, no_match_input) = case head (head pattern) of 
   --                         '\\' ->  (take 1 input, 1, drop 1 input, drop 1 input)
   --                         '^'  -> (take (length pattern - 1) input , (length pattern) - 1, drop ((length pattern)-1) input, drop 1 input)
   --                         '[' -> (take (length pattern - 2) input , (length pattern) - 2, drop ((length pattern)-2) input, drop 1 input)
+    | last pattern == "$" = matchPattern_string_anchor (init pattern) input
   -- in
-    if matchPattern (head pattern) (head input) 
     -- Now we match the first pattern with the input, if it's true we do the following
     -- Initiate matching of rest of the pattern w/ rest of the input
     -- Initiate matching of same pattern w/ rest of the input
-                          then matchPattern_parent (tail pattern) processed_input || matchPattern_parent pattern processed_input
+    | matchPattern (head pattern) (head input) = matchPattern_parent (tail pattern) processed_input || matchPattern_parent pattern processed_input
     -- otherwise if the pattern has not matched then we keep the pattern and match the rest of the input
-                          else matchPattern_parent pattern processed_input
-    where 
-      processed_input = tail input
+    | otherwise = matchPattern_parent pattern processed_input
+      where 
+        processed_input = tail input
 
 --At the very modular level, we need to tokenize and collect the pattern tokens and invoke the parent matching function
 tokenize_pattern :: String->[String]
 tokenize_pattern [] = []
 tokenize_pattern ('\\':character:rest) = [['\\',character]] ++ tokenize_pattern rest
 tokenize_pattern ('^':rest) = ["^"] ++ tokenize_pattern rest
+tokenize_pattern ('$':rest) = ["$"] ++ tokenize_pattern rest
 tokenize_pattern pattern@('[':rest) = 
   let (before,after) = break (==']') pattern
       in case after of 
