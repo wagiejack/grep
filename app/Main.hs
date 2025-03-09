@@ -12,7 +12,6 @@ match_single_wildcards wildcard input
 
 matchPattern :: String -> Char -> Bool
 matchPattern pattern input
-  | lp==1 && pattern == "+" = True
   | lp==1 = elem input pattern
   | lp==2 && head pattern == '\\' = match_single_wildcards (last pattern) input
   | head pattern == '[' && last pattern == ']' = case pattern of 
@@ -40,7 +39,8 @@ matchPattern_one_or_more :: [String]->String->Bool
 matchPattern_one_or_more [] []= True
 matchPattern_one_or_more [] _ = False
 matchPattern_one_or_more _ [] = False
-matchPattern_one_or_more pattern@(first_pattern:rest_pattern) input@(first_input:rest_input)
+-- second_pattern here is '+'
+matchPattern_one_or_more pattern@(first_pattern:"+":rest_pattern) input@(first_input:rest_input)
   | matchPattern first_pattern first_input = matchPattern_one_or_more pattern rest_input || 
                                            matchPattern_parent rest_pattern rest_input ||
                                            matchPattern_parent pattern rest_input
@@ -56,7 +56,8 @@ matchPattern_one_or_more pattern@(first_pattern:rest_pattern) input@(first_input
  -- if '[]' then we can send length pattern - 2 size of input and increment by the same for if else cases
  -- if ^something then we can send length of pattern -1 and increment accordingly the input processing for other cases
 matchPattern_parent :: [String]->String->Bool
-matchPattern_parent [] _ = True
+matchPattern_parent [] [] = True
+matchPattern_parent [] _ = False
 matchPattern_parent _ [] = False
 -- start of string anchor matching
 matchPattern_parent (['^']:rest_of_pattern) input = matchPattern_string_anchor rest_of_pattern input
@@ -73,7 +74,7 @@ matchPattern_parent pattern input
       -- if no match, then we 
        -- next pattern, same input
   -- in
-    | head pattern == "+" = matchPattern_one_or_more pattern input
+    | length pattern >=2 && second_pattern == "+" = matchPattern_one_or_more pattern input
     -- Now we match the first pattern with the input, if it's true we do the following
     -- Initiate matching of rest of the pattern w/ rest of the input
     -- Initiate matching of same pattern w/ rest of the input
@@ -82,6 +83,8 @@ matchPattern_parent pattern input
     | otherwise = matchPattern_parent pattern processed_input
       where 
         processed_input = tail input
+        second_pattern = head (tail pattern)
+        first_pattern = head pattern
 
 --At the very modular level, we need to tokenize and collect the pattern tokens and invoke the parent matching function
 tokenize_pattern :: String->[String]
