@@ -12,6 +12,7 @@ match_single_wildcards wildcard input
 
 matchPattern :: String -> Char -> Bool
 matchPattern pattern input
+  | lp==1 && pattern == "+" = True
   | lp==1 = elem input pattern
   | lp==2 && head pattern == '\\' = match_single_wildcards (last pattern) input
   | head pattern == '[' && last pattern == ']' = case pattern of 
@@ -27,6 +28,23 @@ matchPattern_string_anchor [] [] = True
 matchPattern_string_anchor [] _ = False
 matchPattern_string_anchor _ [] = False
 matchPattern_string_anchor patterns (input:rest_inputs) = (matchPattern (head patterns) input) && (matchPattern_string_anchor (tail patterns) rest_inputs)
+
+-- at one point, when we have moved on from this mathcing, we want to return to matchPattern_parent for the matching to continue normal matching
+-- when do we go back to the parent function? We do a match, we do two things
+ -- same pattern next input
+ -- next pattern next input (pass to parent)
+ -- same pattern next input (pass to parent)
+-- in case of no match  
+ -- next pattern same input (pass to parent)
+matchPattern_one_or_more :: [String]->String->Bool
+matchPattern_one_or_more [] []= True
+matchPattern_one_or_more [] _ = False
+matchPattern_one_or_more _ [] = False
+matchPattern_one_or_more pattern@(first_pattern:rest_pattern) input@(first_input:rest_input)
+  | matchPattern first_pattern first_input = matchPattern_one_or_more pattern rest_input || 
+                                           matchPattern_parent rest_pattern rest_input ||
+                                           matchPattern_parent pattern rest_input
+  | otherwise = matchPattern_parent rest_pattern input
 
 -- we need one more level of abstraction between the first pattern matcher and the processor where
   -- if we have a \ then we also send the next character 
@@ -50,7 +68,12 @@ matchPattern_parent pattern input
   --                         '^'  -> (take (length pattern - 1) input , (length pattern) - 1, drop ((length pattern)-1) input, drop 1 input)
   --                         '[' -> (take (length pattern - 2) input , (length pattern) - 2, drop ((length pattern)-2) input, drop 1 input)
     | last pattern == "$" = matchPattern_string_anchor (init pattern) input
+    -- to implement +,which matches 1 or anything even if we match, we have the following two choices
+       -- same pattern, next input
+      -- if no match, then we 
+       -- next pattern, same input
   -- in
+    | head pattern == "+" = matchPattern_one_or_more pattern input
     -- Now we match the first pattern with the input, if it's true we do the following
     -- Initiate matching of rest of the pattern w/ rest of the input
     -- Initiate matching of same pattern w/ rest of the input
@@ -66,6 +89,7 @@ tokenize_pattern [] = []
 tokenize_pattern ('\\':character:rest) = [['\\',character]] ++ tokenize_pattern rest
 tokenize_pattern ('^':rest) = ["^"] ++ tokenize_pattern rest
 tokenize_pattern ('$':rest) = ["$"] ++ tokenize_pattern rest
+tokenize_pattern ('+':rest) = ["+"] ++ tokenize_pattern rest
 tokenize_pattern pattern@('[':rest) = 
   let (before,after) = break (==']') pattern
       in case after of 
