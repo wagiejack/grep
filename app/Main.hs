@@ -12,7 +12,10 @@ match_single_wildcards wildcard input
 
 matchPattern :: String -> Char -> Bool
 matchPattern pattern input
-  | lp==1 = elem input pattern
+  | lp==1 = 
+      case pattern of 
+          "." -> True
+          _  -> elem input pattern
   | lp==2 && head pattern == '\\' = match_single_wildcards (last pattern) input
   | head pattern == '[' && last pattern == ']' = case pattern of 
                                                   ('[':'^':rest_of_pattern) -> notElem input (init rest_of_pattern)
@@ -73,8 +76,6 @@ matchPattern_parent :: [String]->String->Bool
 matchPattern_parent [] [] = True
 matchPattern_parent [] _ = True
 matchPattern_parent _ [] = False
--- dot matching
-matchPattern_parent (['.']:rest_of_pattern) input = matchPattern_parent rest_of_pattern (tail input)
 -- start of string anchor matching
 matchPattern_parent (['^']:rest_of_pattern) input = matchPattern_string_anchor rest_of_pattern input
 -- other matching
