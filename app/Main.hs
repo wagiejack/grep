@@ -4,6 +4,14 @@ import System.Environment
 import System.Exit
 import System.IO (hSetBuffering, stdout, stderr, BufferMode (NoBuffering))
 
+splitByPipe :: [String] -> [[String]]
+splitByPipe [] = []
+splitByPipe xs =
+  let (prefix, rest) = break (== "|") xs
+  in prefix : case rest of
+                [] -> []
+                _:rs -> splitByPipe rs
+
 match_single_wildcards :: Char -> Char ->Bool
 match_single_wildcards wildcard input
   | wildcard=='d' = elem input ['0'..'9']
@@ -115,6 +123,7 @@ tokenize_pattern ('$':rest) = ["$"] ++ tokenize_pattern rest
 tokenize_pattern ('+':rest) = ["+"] ++ tokenize_pattern rest
 tokenize_pattern ('?':rest) = ["?"] ++ tokenize_pattern rest
 tokenize_pattern ('.':rest) = ["."] ++ tokenize_pattern rest
+tokenize_pattern ('|':rest) = ["|"] ++ tokenize_pattern rest
 tokenize_pattern pattern@('[':rest) = 
   let (before,after) = break (==']') pattern
       in case after of 
@@ -122,11 +131,23 @@ tokenize_pattern pattern@('[':rest) =
           _ -> [before ++ "]"] ++ (tokenize_pattern (tail after) )
 tokenize_pattern (first_char:rest) = [[first_char]] ++ (tokenize_pattern rest) 
 
+matchAllPatterns :: [[String]]->String->Bool
+matchAllPatterns [] [] = True
+matchAllPatterns [] _ = False
+matchAllPatterns _ [] = False
+matchAllPatterns (first_pattern:rest_of_patterns) input = matchPattern_parent first_pattern input ||
+                                                         matchAllPatterns rest_of_patterns input
 
 tokenize_patterns_and_match :: String->String->Bool
 tokenize_patterns_and_match _ [] = False
 tokenize_patterns_and_match [] _ = False
-tokenize_patterns_and_match pattern input = matchPattern_parent (tokenize_pattern pattern) input
+-- separating them by | and initiating separate matches for them while maintaining original support
+tokenize_patterns_and_match pattern input 
+  | elem "|" patterns = let separate_patterns = (splitByPipe patterns) in
+                          matchAllPatterns separate_patterns input 
+  | otherwise = matchPattern_parent patterns input
+    where
+      patterns = tokenize_pattern pattern
 
 main :: IO ()
 main = do
