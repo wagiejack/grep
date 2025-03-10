@@ -91,11 +91,13 @@ matchPattern_parent pattern input
     | length pattern >=2 && second_pattern == "+" = matchPattern_one_or_more pattern input
     -- we need to do the same for ?
     | length pattern >=2 && second_pattern == "?" = matchPattern_zero_or_one pattern input 
+-- if we get a . then we pass this, so we simply move on to parent with next pattern, next input
+    | head pattern == "." = matchPattern_parent (tail pattern) (tail input)
     -- initiating the same 
     -- Now we match the first pattern with the input, if it's true we do the following
     -- Initiate matching of rest of the pattern w/ rest of the input
     -- Initiate matching of same pattern w/ rest of the input
-    | matchPattern (head pattern) (head input) = matchPattern_parent (tail pattern) processed_input || matchPattern_parent pattern processed_input
+    | head pattern /= "." && matchPattern (head pattern) (head input) = matchPattern_parent (tail pattern) processed_input || matchPattern_parent pattern processed_input
     -- otherwise if the pattern has not matched then we keep the pattern and match the rest of the input
     | otherwise = matchPattern_parent pattern processed_input
       where 
@@ -111,6 +113,7 @@ tokenize_pattern ('^':rest) = ["^"] ++ tokenize_pattern rest
 tokenize_pattern ('$':rest) = ["$"] ++ tokenize_pattern rest
 tokenize_pattern ('+':rest) = ["+"] ++ tokenize_pattern rest
 tokenize_pattern ('?':rest) = ["?"] ++ tokenize_pattern rest
+tokenize_pattern ('.':rest) = ["."] ++ tokenize_pattern rest
 tokenize_pattern pattern@('[':rest) = 
   let (before,after) = break (==']') pattern
       in case after of 
