@@ -28,6 +28,20 @@ matchPattern_string_anchor [] _ = False
 matchPattern_string_anchor _ [] = False
 matchPattern_string_anchor patterns (input:rest_inputs) = (matchPattern (head patterns) input) && (matchPattern_string_anchor (tail patterns) rest_inputs)
 
+-- when do we go back to the parent function? We have to keep in mind that this is 0 or 1 so we can forgive this matching and go forward with the rest of the pattern or we can shift one of the input if we are accomodating this, we cannot shift infinite inputs like we did with one or more. In case of a no-match, we can skip this pattern and go to the parent function for rest of the pattern with the same input. So boling down the cases we have
+  -- in case of a match
+   -- next pattern next input(parent)
+  -- in case of no match
+   -- next pattern same input (parent)
+matchPattern_zero_or_one :: [String]->String->Bool
+matchPattern_zero_or_one [] []= True
+matchPattern_zero_or_one [] _ = False
+matchPattern_zero_or_one _ [] = False
+-- second_pattern here is '?'
+matchPattern_zero_or_one pattern@(first_pattern:"?":rest_pattern) input@(first_input:rest_input)
+  | matchPattern first_pattern first_input = matchPattern_parent rest_pattern rest_input
+  | otherwise = matchPattern_parent rest_pattern input
+
 -- at one point, when we have moved on from this mathcing, we want to return to matchPattern_parent for the matching to continue normal matching
 -- when do we go back to the parent function? We do a match, we do two things
  -- same pattern next input
@@ -75,6 +89,9 @@ matchPattern_parent pattern input
        -- next pattern, same input
   -- in
     | length pattern >=2 && second_pattern == "+" = matchPattern_one_or_more pattern input
+    -- we need to do the same for ?
+    | length pattern >=2 && second_pattern == "?" = matchPattern_zero_or_one pattern input 
+    -- initiating the same 
     -- Now we match the first pattern with the input, if it's true we do the following
     -- Initiate matching of rest of the pattern w/ rest of the input
     -- Initiate matching of same pattern w/ rest of the input
@@ -93,6 +110,7 @@ tokenize_pattern ('\\':character:rest) = [['\\',character]] ++ tokenize_pattern 
 tokenize_pattern ('^':rest) = ["^"] ++ tokenize_pattern rest
 tokenize_pattern ('$':rest) = ["$"] ++ tokenize_pattern rest
 tokenize_pattern ('+':rest) = ["+"] ++ tokenize_pattern rest
+tokenize_pattern ('?':rest) = ["?"] ++ tokenize_pattern rest
 tokenize_pattern pattern@('[':rest) = 
   let (before,after) = break (==']') pattern
       in case after of 
