@@ -72,6 +72,28 @@ matchPattern_one_or_more pattern@(first_pattern:"+":rest_pattern) input@(first_i
  -- if simple pattern or \ <something> then we can send single input
  -- if '[]' then we can send length pattern - 2 size of input and increment by the same for if else cases
  -- if ^something then we can send length of pattern -1 and increment accordingly the input processing for other cases
+
+ -- now to introduce alternation, we are capturing the pattern as (<a>|<b>), what we can do is when we enounter this, we can tokenize <a> and allocate it with rest of the pattern and fire up the match pattern, we can also tokenize <b> and allocate it with rest of the pattern and fire up the pattern, this would inroduce no other changes or introduce any other function and would also help in achieving the functionality so to summarize, we can do
+  -- On ecountering pattern token divided by (), pass it into a function that separates by "|" and return a [String] so, String->[String]
+  -- The [String] obtained are the possible patterns, what we want to do is we want to tokenize this and attach it to the rest of the pattern and send the same input to matchPattern_parent and we want the result to be a OR of all the possible patterns
+split_alternation_patterns :: String -> [String]
+split_alternation_patterns "" = [""]
+split_alternation_patterns pattern@(first_char:rest)
+  | first_char=='|' = "" : split_alternation_patterns rest
+  | otherwise = first_part : remaining_parts
+    where
+      (first_part, remaining) = break (=='|') pattern
+      remaining_parts = if null remaining 
+                        then [] 
+                        else split_alternation_patterns (tail remaining)
+
+match_splitted_patterns :: [String]-> [String] -> String ->Bool
+match_splitted_patterns [] _ _ = False
+match_splitted_patterns (first_possible_pattern:rest_possible_patterns) patterns input =
+  matchPattern_parent ((tokenize_pattern first_possible_pattern) ++ patterns) input || 
+  match_splitted_patterns rest_possible_patterns patterns input
+  
+
 matchPattern_parent :: [String]->String->Bool
 matchPattern_parent [] [] = True
 matchPattern_parent [] _ = True
@@ -94,6 +116,8 @@ matchPattern_parent pattern input
     | length pattern >=2 && second_pattern == "+" = matchPattern_one_or_more pattern input
     -- we need to do the same for ?
     | length pattern >=2 && second_pattern == "?" = matchPattern_zero_or_one pattern input 
+    | first_pattern_char=='(' && last_pattern_char==')' = let potential_patterns = split_alternation_patterns trimmed_patterns_for_alternation in
+                                                            match_splitted_patterns potential_patterns (tail pattern) input 
     -- initiating the same 
     -- Now we match the first pattern with the input, if it's true we do the following
     -- Initiate matching of rest of the pattern w/ rest of the input
@@ -105,6 +129,9 @@ matchPattern_parent pattern input
         processed_input = tail input
         second_pattern = head (tail pattern)
         first_pattern = head pattern
+        first_pattern_char = head first_pattern
+        last_pattern_char = last first_pattern
+        trimmed_patterns_for_alternation = init (tail first_pattern)
 
 --At the very modular level, we need to tokenize and collect the pattern tokens and invoke the parent matching function
 tokenize_pattern :: String->[String]
@@ -115,6 +142,11 @@ tokenize_pattern ('$':rest) = ["$"] ++ tokenize_pattern rest
 tokenize_pattern ('+':rest) = ["+"] ++ tokenize_pattern rest
 tokenize_pattern ('?':rest) = ["?"] ++ tokenize_pattern rest
 tokenize_pattern ('.':rest) = ["."] ++ tokenize_pattern rest
+tokenize_pattern pattern@('(':rest) = 
+  let (before,after) = break (==')') pattern
+      in case after of 
+          [')'] ->[before ++ ")"]
+          _ -> [before ++ ")"] ++ (tokenize_pattern (tail after) )
 tokenize_pattern pattern@('[':rest) = 
   let (before,after) = break (==']') pattern
       in case after of 
