@@ -139,17 +139,15 @@ tokenize_pattern [] = []
 tokenize_pattern ('\\':character:rest) = [['\\',character]] ++ tokenize_pattern rest
 tokenize_pattern (first_char:rest)
   | elem first_char ['^','$','+','?','.'] = [first_char] ++ tokenize_pattern rest
+  | elem first_char ['[','('] = let (before,after) = break (==closing_char) pattern
+                               in case after of 
+                                    [closing_char] ->[before ++ [closing_char]]
+                                    _ -> [before ++ [closing_char]] ++ (tokenize_pattern (tail after) )
   | otherwise = [[first_char]] ++ (tokenize_pattern rest) 
-tokenize_pattern pattern@('(':rest) = 
-  let (before,after) = break (==')') pattern
-      in case after of 
-          [')'] ->[before ++ ")"]
-          _ -> [before ++ ")"] ++ (tokenize_pattern (tail after) )
-tokenize_pattern pattern@('[':rest) = 
-  let (before,after) = break (==']') pattern
-      in case after of 
-          [']'] ->[before ++ "]"]
-          _ -> [before ++ "]"] ++ (tokenize_pattern (tail after) )
+    where
+      closing_char
+        | first_char == '(' = ')'
+        | otherwise = ']'
 
 tokenize_patterns_and_match :: String->String->Bool
 tokenize_patterns_and_match _ [] = False
