@@ -137,11 +137,9 @@ matchPattern_parent pattern input
 tokenize_pattern :: String->[String]
 tokenize_pattern [] = []
 tokenize_pattern ('\\':character:rest) = [['\\',character]] ++ tokenize_pattern rest
-tokenize_pattern ('^':rest) = ["^"] ++ tokenize_pattern rest
-tokenize_pattern ('$':rest) = ["$"] ++ tokenize_pattern rest
-tokenize_pattern ('+':rest) = ["+"] ++ tokenize_pattern rest
-tokenize_pattern ('?':rest) = ["?"] ++ tokenize_pattern rest
-tokenize_pattern ('.':rest) = ["."] ++ tokenize_pattern rest
+tokenize_pattern (first_char:rest) = 
+  | elem first_char ['^','$','+','?','.'] = [first_char] ++ tokenize_pattern rest
+  | otherwise = [[first_char]] ++ (tokenize_pattern rest) 
 tokenize_pattern pattern@('(':rest) = 
   let (before,after) = break (==')') pattern
       in case after of 
@@ -152,7 +150,6 @@ tokenize_pattern pattern@('[':rest) =
       in case after of 
           [']'] ->[before ++ "]"]
           _ -> [before ++ "]"] ++ (tokenize_pattern (tail after) )
-tokenize_pattern (first_char:rest) = [[first_char]] ++ (tokenize_pattern rest) 
 
 tokenize_patterns_and_match :: String->String->Bool
 tokenize_patterns_and_match _ [] = False
