@@ -137,7 +137,7 @@ matchPattern_parent pattern input
 tokenize_pattern :: String->[String]
 tokenize_pattern [] = []
 tokenize_pattern ('\\':character:rest) = [['\\',character]] ++ tokenize_pattern rest
-tokenize_pattern (first_char:rest)
+tokenize_pattern pattern@(first_char:rest)
   | elem first_char ['^','$','+','?','.'] = [first_char] ++ tokenize_pattern rest
   | elem first_char ['[','('] = let (before,after) = break (==closing_char) pattern
                                in case after of 
