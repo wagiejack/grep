@@ -1,4 +1,14 @@
+# Index
+ - [🤯 Oh Boy! You implemented the entire Grep like a based Boi?](#-oh-boy-you-implemented-the-entire-grep-like-a-based-boi)
+ - [:suspect: Is it Gud?](#suspect-is-it-gud)
+ - [🚨 Did it pass Codecrafters tests](#-did-it-pass-codecrafters-tests)
+ - [📌 Features (We all know its summarized with LLM so...yeah)](#-features-we-all-know-its-summarized-with-llm-soyeah)
+ - [📋 Kay, how do I run it tho](#-kay-how-do-i-run-it-tho)
+ - [🙌 Thanks for Visiting](#-thanks-for-visiting)
+
 # 🤯 Oh Boy! You implemented the entire Grep like a based Boi?
+[Index](#index)
+ 
 
 No 
 
@@ -11,6 +21,8 @@ At the time of writing this code, I only have knowledge upto Higher order functi
 [Codecrafters link for the challenge](https://app.codecrafters.io/courses/grep/stages/).
 
 # :suspect: Is it Gud?
+[Index](#index)
+ 
 
 Even this version constructed with the lack of skilled Haskal, Haskal, Haskal, Haskal is just `128 LOC` (80 akshually) and ik that is not always a indicator of good code but rather a signal that some undreadable clusterfuck has been made,
 
@@ -19,6 +31,8 @@ But truly, with my limited knowledge, this is pretty straightforward and easy to
 <img width="779" alt="image" src="https://github.com/user-attachments/assets/d6f93ce8-14dc-4abf-a4b6-7496ba10b3c6" />
 
 # 🚨 Did it pass Codecrafters tests
+[Index](#index)
+ 
 
 This passed all the code-crafters tests except the additional ones 
 
@@ -29,6 +43,8 @@ Before you throw a Gotcha, Ik it fails, but it fails at the additional tests and
 <img width="294" alt="image" src="https://github.com/user-attachments/assets/e2229b46-94d0-42f9-94c1-6eb0c1c6cee2" />
 
 # 📌 Features (We all know its summarized with LLM so...yeah)
+[Index](#index)
+ 
 
 Here's the regex matcher features in a markdown table:
 
@@ -46,6 +62,8 @@ Here's the regex matcher features in a markdown table:
 | Dot (.) | `.` | Matches any single character |
 
 # 📋 Kay, how do I run it tho
+[Index](#index)
+ 
 
 Tbh, easiest way is to install [ghc](https://www.haskell.org/downloads/), navigate to /app and run `ghci` and run the command `:l Main.hs` which will load the file up
 
@@ -61,5 +79,8 @@ LLM summarized instructions below btw
 Alternatively, on Unix-like systems (macOS, Linux), run ./your_program.sh if available. For Windows, use Git Bash or WSL to run the script.
 
 # 🙌 Thanks for Visiting
+[Index](#index)
+ 
 
 ![wrote haskal award](https://github.com/user-attachments/assets/e3371255-a658-45f4-8b69-b434367ff662)
+
